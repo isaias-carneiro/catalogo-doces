@@ -105,25 +105,6 @@ export default function App() {
       encodeURIComponent(msg);
 
     window.open(url, "_blank");
-
-    enviarSheets(id);
-  }
-
-  // Google Sheets (via Apps Script)
-  function enviarSheets(id) {
-
-    fetch("SUA_URL_DO_SCRIPT_AQUI", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-
-      body: JSON.stringify({
-        id,
-        ...form,
-        total: total(),
-        itens: carrinho,
-        dataRegistro: new Date().toISOString()
-      })
-    });
   }
 
   return (
@@ -137,14 +118,23 @@ export default function App() {
 
           <div key={i} className="card">
 
-            <img
-              src={d.imagem}
-              onClick={() => setZoom(d.imagem)}
-            />
+            {/* IMAGEM */}
+            <div className="imagem-box">
+
+              <img
+                src={d.imagem}
+                className="foto"
+                onClick={() => setZoom(d.imagem)}
+                alt={d.nome}
+              />
+
+            </div>
 
             <h2>{d.nome}</h2>
 
-            <span>R$ {d.preco.toFixed(2)}</span>
+            <span className="preco">
+              R$ {d.preco.toFixed(2)}
+            </span>
 
             <div className="controle">
 
@@ -166,31 +156,62 @@ export default function App() {
 
       </main>
 
-      {/* Formulário */}
+
+      {/* FORMULÁRIO */}
       {Object.keys(carrinho).length > 0 && (
 
         <section className="form">
 
           <h3>📋 Dados do Cliente</h3>
 
-          <input name="nome" placeholder="Nome" onChange={handleForm} />
-          <input name="telefone" placeholder="Telefone" onChange={handleForm} />
-          <input name="endereco" placeholder="Endereço" onChange={handleForm} />
-          <input name="pagamento" placeholder="Forma de Pagamento" onChange={handleForm} />
-          <input type="date" name="data" onChange={handleForm} />
+          <input
+            name="nome"
+            placeholder="Nome"
+            onChange={handleForm}
+          />
+
+          <input
+            name="telefone"
+            placeholder="Telefone"
+            onChange={handleForm}
+          />
+
+          <input
+            name="endereco"
+            placeholder="Endereço"
+            onChange={handleForm}
+          />
+
+          <input
+            name="pagamento"
+            placeholder="Forma de Pagamento"
+            onChange={handleForm}
+          />
+
+          <input
+            type="date"
+            name="data"
+            onChange={handleForm}
+          />
 
         </section>
 
       )}
 
-      {/* Rodapé */}
+
+      {/* RODAPÉ */}
       {Object.keys(carrinho).length > 0 && (
 
         <footer>
 
-          <p>Total: R$ {total().toFixed(2)}</p>
+          <p>
+            Total: R$ {total().toFixed(2)}
+          </p>
 
-          <button className="btn" onClick={enviarZap}>
+          <button
+            className="btn"
+            onClick={enviarZap}
+          >
             <Phone size={18} /> Finalizar Pedido
           </button>
 
@@ -198,7 +219,8 @@ export default function App() {
 
       )}
 
-      {/* Zoom */}
+
+      {/* ZOOM */}
       {zoom && (
 
         <div className="zoom">
@@ -207,7 +229,7 @@ export default function App() {
             <X size={28} />
           </button>
 
-          <img src={zoom} />
+          <img src={zoom} alt="Zoom" />
 
         </div>
 
