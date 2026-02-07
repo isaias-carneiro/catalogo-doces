@@ -90,9 +90,9 @@ export default function App() {
 
     msg += `👤 Nome: ${form.nome}\n`;
     msg += `📞 Tel: ${form.telefone}\n`;
+    msg += `🏠 Endereço: ${form.endereco}\n`;
     msg += `📍 CEP: ${form.cep}\n`;
     msg += `🏘️ Bairro: ${form.bairro}\n`;
-    msg += `🏠 Endereço: ${form.endereco}\n`;
     msg += `💳 Pagamento: ${form.pagamento}\n`;
     msg += `📅 Entrega: ${formatarDataBR(form.data)}\n\n`;
 
@@ -184,8 +184,7 @@ export default function App() {
             />
 
         </section>
-
-
+        
       )}
 
       {Object.keys(carrinho).length > 0 && (
