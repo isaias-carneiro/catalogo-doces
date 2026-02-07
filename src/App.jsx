@@ -1,5 +1,5 @@
 import "./App.css";
-import { Phone, Plus, Minus } from "lucide-react";
+import { Phone, Plus, Minus, X } from "lucide-react";
 import { useState } from "react";
 
 import aplique from "./assets/Doces_Aplique.jpeg";
@@ -12,119 +12,140 @@ import grandes from "./assets/Doces_Grandes.jpeg";
 export default function App() {
 
   const doces = [
-    {
-      nome: "Apliques",
-      preco: 2.0,
-      imagem: aplique,
-    },
-    {
-      nome: "Frutinhas",
-      preco: 2.0,
-      imagem: frutinhas,
-    },
-    {
-      nome: "Detalhados na Base",
-      preco: 2.5,
-      imagem: base,
-    },
-    {
-      nome: "Modelados 2D",
-      preco: 3.0,
-      imagem: d2,
-    },
-    {
-      nome: "Modelados 3D",
-      preco: 3.5,
-      imagem: d3,
-    },
-    {
-      nome: "Versões Maiores",
-      preco: 8.0,
-      imagem: grandes,
-    },
+    { nome: "Apliques", preco: 2, imagem: aplique },
+    { nome: "Frutinhas", preco: 2, imagem: frutinhas },
+    { nome: "Detalhados", preco: 2.5, imagem: base },
+    { nome: "Modelados 2D", preco: 3, imagem: d2 },
+    { nome: "Modelados 3D", preco: 3.5, imagem: d3 },
+    { nome: "Grandes", preco: 8, imagem: grandes },
   ];
 
-  // Carrinho
   const [carrinho, setCarrinho] = useState({});
+  const [zoom, setZoom] = useState(null);
 
-  // Adicionar
+  const [form, setForm] = useState({
+    nome: "",
+    telefone: "",
+    endereco: "",
+    pagamento: "",
+    data: ""
+  });
+
+  function gerarID() {
+    return "JD-" + Date.now().toString().slice(-6);
+  }
+
   function adicionar(i) {
-    setCarrinho(prev => ({
-      ...prev,
-      [i]: (prev[i] || 0) + 1
-    }));
+    setCarrinho(p => ({ ...p, [i]: (p[i] || 0) + 1 }));
   }
 
-  // Remover
   function remover(i) {
-    setCarrinho(prev => {
-      const novo = { ...prev };
+    setCarrinho(p => {
+      const n = { ...p };
+      if (n[i] > 1) n[i]--;
+      else delete n[i];
+      return n;
+    });
+  }
 
-      if (novo[i] > 1) {
-        novo[i]--;
-      } else {
-        delete novo[i];
+  function total() {
+    return Object.keys(carrinho)
+      .reduce((t, i) => t + doces[i].preco * carrinho[i], 0);
+  }
+
+  function handleForm(e) {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  }
+
+  function validar() {
+
+    for (let k in form) {
+      if (!form[k]) {
+        alert("Preencha todos os dados antes de enviar.");
+        return false;
       }
+    }
 
-      return novo;
-    });
+    if (Object.keys(carrinho).length === 0) {
+      alert("Escolha ao menos um produto.");
+      return false;
+    }
+
+    return true;
   }
 
-  // Total
-  function calcularTotal() {
-    let total = 0;
+  function enviarZap() {
+
+    if (!validar()) return;
+
+    const id = gerarID();
+
+    let msg = `📦 *Pedido #${id}*\n\n`;
+
+    msg += `👤 Nome: ${form.nome}\n`;
+    msg += `📞 Tel: ${form.telefone}\n`;
+    msg += `🏠 Endereço: ${form.endereco}\n`;
+    msg += `💳 Pagamento: ${form.pagamento}\n`;
+    msg += `📅 Entrega: ${form.data}\n\n`;
+
+    msg += `🍬 *Itens:*\n`;
 
     Object.keys(carrinho).forEach(i => {
-      total += doces[i].preco * carrinho[i];
-    });
-
-    return total;
-  }
-
-  // Gerar mensagem
-  function gerarZap() {
-
-    let msg = "🍬 *Pedido - Jack Doces*\n\n";
-
-    Object.keys(carrinho).forEach(i => {
-
       const d = doces[i];
-      const qtd = carrinho[i];
-      const sub = (d.preco * qtd).toFixed(2);
+      const q = carrinho[i];
+      const s = (d.preco * q).toFixed(2);
 
-      msg += `• ${d.nome} - ${qtd}x → R$ ${sub}\n`;
+      msg += `• ${d.nome} - ${q}x → R$ ${s}\n`;
     });
 
-    msg += `\n💰 *Total: R$ ${calcularTotal().toFixed(2)}*`;
-    msg += "\n\nAguardo confirmação. Obrigado! 💖";
+    msg += `\n💰 *Total: R$ ${total().toFixed(2)}*`;
 
-    const url = `https://wa.me/5583986609978?text=${encodeURIComponent(msg)}`;
+    const url =
+      "https://wa.me/5581988604820?text=" +
+      encodeURIComponent(msg);
 
     window.open(url, "_blank");
+
+    enviarSheets(id);
+  }
+
+  // Google Sheets (via Apps Script)
+  function enviarSheets(id) {
+
+    fetch("SUA_URL_DO_SCRIPT_AQUI", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+
+      body: JSON.stringify({
+        id,
+        ...form,
+        total: total(),
+        itens: carrinho,
+        dataRegistro: new Date().toISOString()
+      })
+    });
   }
 
   return (
     <div className="container">
 
-      <h1>🍬 Catálogo Jack Doces</h1>
+      <h1>🍬 Jack Doces</h1>
 
       <main className="cards">
 
-        {doces.map((doce, i) => (
+        {doces.map((d, i) => (
 
           <div key={i} className="card">
+
             <img
-            src={doce.imagem}
-            alt={doce.nome}
-            className="foto"/>
-            
-            <h2>{doce.nome}</h2>
+              src={d.imagem}
+              onClick={() => setZoom(d.imagem)}
+            />
 
-            <span className="preco">
-              R$ {doce.preco.toFixed(2)}
-            </span>
+            <h2>{d.nome}</h2>
 
-            {/* Controles */}
+            <span>R$ {d.preco.toFixed(2)}</span>
+
             <div className="controle">
 
               <button onClick={() => remover(i)}>
@@ -145,21 +166,50 @@ export default function App() {
 
       </main>
 
+      {/* Formulário */}
+      {Object.keys(carrinho).length > 0 && (
+
+        <section className="form">
+
+          <h3>📋 Dados do Cliente</h3>
+
+          <input name="nome" placeholder="Nome" onChange={handleForm} />
+          <input name="telefone" placeholder="Telefone" onChange={handleForm} />
+          <input name="endereco" placeholder="Endereço" onChange={handleForm} />
+          <input name="pagamento" placeholder="Forma de Pagamento" onChange={handleForm} />
+          <input type="date" name="data" onChange={handleForm} />
+
+        </section>
+
+      )}
+
       {/* Rodapé */}
       {Object.keys(carrinho).length > 0 && (
 
         <footer>
 
-          <p>
-            Total: <strong>R$ {calcularTotal().toFixed(2)}</strong>
-          </p>
+          <p>Total: R$ {total().toFixed(2)}</p>
 
-          <button className="btn" onClick={gerarZap}>
-            <Phone size={18} />
-            Finalizar no WhatsApp
+          <button className="btn" onClick={enviarZap}>
+            <Phone size={18} /> Finalizar Pedido
           </button>
 
         </footer>
+
+      )}
+
+      {/* Zoom */}
+      {zoom && (
+
+        <div className="zoom">
+
+          <button onClick={() => setZoom(null)}>
+            <X size={28} />
+          </button>
+
+          <img src={zoom} />
+
+        </div>
 
       )}
 
