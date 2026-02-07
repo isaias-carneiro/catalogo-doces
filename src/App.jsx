@@ -27,9 +27,11 @@ export default function App() {
     nome: "",
     telefone: "",
     endereco: "",
+    bairro: "",
+    cep: "",
     pagamento: "",
     data: ""
-  });
+  }); 
 
   function gerarID() {
     return "JD-" + Date.now().toString().slice(-6);
@@ -88,6 +90,8 @@ export default function App() {
 
     msg += `👤 Nome: ${form.nome}\n`;
     msg += `📞 Tel: ${form.telefone}\n`;
+    msg += `📍 CEP: ${form.cep}\n`;
+    msg += `🏘️ Bairro: ${form.bairro}\n`;
     msg += `🏠 Endereço: ${form.endereco}\n`;
     msg += `💳 Pagamento: ${form.pagamento}\n`;
     msg += `📅 Entrega: ${formatarDataBR(form.data)}\n\n`;
@@ -160,13 +164,27 @@ export default function App() {
 
           <h3>📋 Dados do Cliente</h3>
 
-          <input name="nome" placeholder="Nome" onChange={handleForm} />
-          <input name="telefone" placeholder="Telefone" onChange={handleForm} />
-          <input name="endereco" placeholder="Endereço" onChange={handleForm} />
-          <input name="pagamento" placeholder="Pagamento" onChange={handleForm} />
-          <input type="date" name="data" onChange={handleForm} />
+            <input name="nome" placeholder="Nome completo" onChange={handleForm} />
+
+            <input name="telefone" placeholder="Telefone / WhatsApp" onChange={handleForm} />
+
+            <input name="cep" placeholder="CEP" onChange={handleForm} />
+
+            <input name="bairro" placeholder="Bairro" onChange={handleForm} />
+
+            <input name="endereco" placeholder="Rua e Número" onChange={handleForm} />
+
+            <input name="pagamento" placeholder="Forma de Pagamento (Pix, Cartão, Dinheiro)" onChange={handleForm} />
+
+            <input
+              type="date"
+              name="data"
+              min={new Date().toISOString().split("T")[0]}
+              onChange={handleForm}
+            />
 
         </section>
+
 
       )}
 
