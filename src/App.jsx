@@ -30,8 +30,10 @@ export default function App() {
     bairro: "",
     cep: "",
     pagamento: "",
-    data: ""
+    data: "",
   }); 
+
+  const API_URL = "https://script.google.com/macros/s/AKfycbzkZyFCv2TfVxYhSDoTckQFQmt48lgKOD9YgGWdv3XNvnFQ0waKbjUV4JbtDLUvMMRy/exec";
 
   function gerarID() {
     return "JD-" + Date.now().toString().slice(-6);
@@ -80,14 +82,41 @@ export default function App() {
     return d.toLocaleDateString("pt-BR");
   }
 
-  function enviarZap() {
+  async function enviarZap() {
 
     if (!validar()) return;
-
+  
     const id = gerarID();
-
+  
+    const pedido = {
+      id,
+      nome: form.nome,
+      telefone: form.telefone,
+      endereco: form.endereco,
+      bairro: form.bairro,
+      cep: form.cep,
+      pagamento: form.pagamento,
+      data: formatarDataBR(form.data),
+      itens: Object.keys(carrinho).map(i => ({
+        produto: doces[i].nome,
+        qtd: carrinho[i],
+        preco: doces[i].preco
+      })),
+      total: total().toFixed(2)
+    };
+  
+    // Envia para Google Sheets
+    await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify(pedido),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+  
+    // Mensagem WhatsApp
     let msg = `📦 *Pedido #${id}*\n\n`;
-
+  
     msg += `👤 Nome: ${form.nome}\n`;
     msg += `📞 Tel: ${form.telefone}\n`;
     msg += `🏠 Endereço: ${form.endereco}\n`;
@@ -95,25 +124,25 @@ export default function App() {
     msg += `🏘️ Bairro: ${form.bairro}\n`;
     msg += `💳 Pagamento: ${form.pagamento}\n`;
     msg += `📅 Entrega: ${formatarDataBR(form.data)}\n\n`;
-
+  
     msg += `🍬 *Itens:*\n`;
-
+  
     Object.keys(carrinho).forEach(i => {
       const d = doces[i];
       const q = carrinho[i];
       const s = (d.preco * q).toFixed(2);
-
+  
       msg += `• ${d.nome} - ${q}x → R$ ${s}\n`;
     });
-
+  
     msg += `\n💰 *Total: R$ ${total().toFixed(2)}*`;
-
+  
     const url =
       "https://wa.me/5581988604820?text=" +
       encodeURIComponent(msg);
-
+  
     window.open(url, "_blank");
-  }
+  } 
 
   return (
     <div className="container">
@@ -184,7 +213,7 @@ export default function App() {
             />
 
         </section>
-        
+
       )}
 
       {Object.keys(carrinho).length > 0 && (
